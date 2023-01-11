@@ -22,4 +22,4 @@ ko_pron
 indic_transliteration
 num_thai
 opencc
-gradio
+gradio==3.15
