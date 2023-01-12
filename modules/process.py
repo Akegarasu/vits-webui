@@ -1,7 +1,7 @@
 from torch import no_grad, LongTensor
 
 import modules.vits_model as vits_model
-from modules.device import device
+from modules.device import device, torch_gc
 from modules.vits_model import VITSModel
 from vits import commons
 from vits.text import text_to_sequence
@@ -9,8 +9,10 @@ from vits.text import text_to_sequence
 
 def text2speech(text: str, speaker, speed):
     speaker_id = vits_model.curr_vits_model.speakers.index(speaker)
-    return process_vits(model=vits_model.curr_vits_model,
+    result = process_vits(model=vits_model.curr_vits_model,
                         text=text, speaker_id=speaker_id, speed=speed)
+    torch_gc()
+    return result
 
 
 def text_processing(text, model: VITSModel):
