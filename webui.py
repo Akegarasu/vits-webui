@@ -24,7 +24,7 @@ def run():
     else:
         server_name = "0.0.0.0" if cmd_opts.listen else None
 
-    app.queue(concurrency_count=3).launch(
+    app.queue(default_enabled=False).launch(
         share=cmd_opts.share,
         server_name=server_name,
         server_port=cmd_opts.port,
