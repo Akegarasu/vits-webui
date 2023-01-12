@@ -1,5 +1,6 @@
 import os
 import sys
+import torch
 from modules.ui import create_ui
 
 from modules.vits_model import refresh_list, init_load_model
@@ -12,6 +13,8 @@ def init():
     print(f"Launching webui with arguments: {' '.join(sys.argv[1:])}")
     if not os.path.exists("outputs"):
         os.mkdir("outputs")
+    if not torch.cuda.is_available():
+        print("CUDA is not available, using cpu mode...")
     refresh_list()
     init_load_model()
 
