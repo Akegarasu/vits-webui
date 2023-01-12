@@ -4,5 +4,4 @@
 __pycache__
 venv
 
-models\vits\*.pth
-models\vits\*.json
+models/vits/**
