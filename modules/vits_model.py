@@ -14,6 +14,18 @@ from typing import List, Dict
 # todo: cmdline here
 MODEL_PATH = os.path.join(os.path.join(os.getcwd(), "models"), "vits")
 
+class VITSModelInfo:
+    model_name: str
+    model_folder: str
+    checkpoint_path: str
+    config_path: str
+
+    def __init__(self, model_name, model_folder, checkpoint_path, config_path):
+        self.model_name = model_name
+        self.model_folder = model_folder
+        self.checkpoint_path = checkpoint_path
+        self.config_path = config_path
+        self.custom_symbols = None
 
 class VITSModel:
     model: SynthesizerTrn
@@ -27,11 +39,11 @@ class VITSModel:
 
     speakers: List[str]
 
-    def __init__(self, model_name: str, model_folder: str, checkpoint_path: str, config_path: str):
-        self.model_name = model_name
-        self.model_folder = model_folder
-        self.checkpoint_path = checkpoint_path
-        self.config_path = config_path
+    def __init__(self, info: VITSModelInfo):
+        self.model_name = info.model_name
+        self.model_folder = info.model_folder
+        self.checkpoint_path = info.checkpoint_path
+        self.config_path = info.config_path
         self.custom_symbols = None
         # self.state = "" # maybe for multiprocessing
 
@@ -63,8 +75,6 @@ class VITSModel:
         self.hps = hps
         self.symbols = _symbols
 
-    # def unload(self):
-    #     del self.model
 
     def load_custom_symbols(self, symbol_path):
         if os.path.exists(symbol_path):
@@ -78,7 +88,7 @@ class VITSModel:
         # todo: custom path
 
 
-vits_model_list: Dict[str, VITSModel] = {}
+vits_model_list: Dict[str, VITSModelInfo] = {}
 curr_vits_model: VITSModel
 
 
@@ -97,18 +107,18 @@ def refresh_list():
         p = os.path.join(MODEL_PATH, d)
         if not os.path.isdir(p):
             continue
-        model_path = search_ext_file(p, ".pth")
-        if not model_path:
+        pth_path = search_ext_file(p, ".pth")
+        if not pth_path:
             print(f"Path {p} does not have a pth file, pass")
             continue
         config_path = search_ext_file(p, ".json")
         if not config_path:
             print(f"Path {p} does not have a config file, pass")
             continue
-        vits_model_list[d] = VITSModel(
+        vits_model_list[d] = VITSModelInfo(
             model_name=d,
             model_folder=p,
-            checkpoint_path=model_path,
+            checkpoint_path=pth_path,
             config_path=config_path
         )
     if len(vits_model_list.items()) == 0:
@@ -117,8 +127,9 @@ def refresh_list():
 
 def init_load_model():
     global curr_vits_model, vits_model_list
-    m = next(iter(vits_model_list.values()))
-    print(f"Loading weights from {m.model_folder}...")
+    info = next(iter(vits_model_list.values()))
+    print(f"Loading weights from {info.model_folder}...")
+    m = VITSModel(info)
     m.load_model()
     curr_vits_model = m
     print("Model loaded.")
@@ -128,8 +139,9 @@ def load_model(model_name: str):
     global curr_vits_model, vits_model_list
     if curr_vits_model.model_name == model_name:
         return
-    m = vits_model_list[model_name]
-    print(f"Loading weights from {m.model_folder}...")
+    info = vits_model_list[model_name]
+    print(f"Loading weights from {info.model_folder}...")
+    m = VITSModel(info)
     m.load_model()
     curr_vits_model = m
     print("Model loaded.")
