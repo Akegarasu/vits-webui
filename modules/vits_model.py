@@ -7,7 +7,7 @@ from modules.device import device
 from vits.models import SynthesizerTrn
 from vits.utils import HParams
 from vits.text.symbols import symbols as builtin_symbols
-from modules.utils import search_ext_file
+from modules.utils import search_ext_file, model_hash
 
 from typing import List, Dict
 
@@ -17,12 +17,14 @@ MODEL_PATH = os.path.join(os.path.join(os.getcwd(), "models"), "vits")
 class VITSModelInfo:
     model_name: str
     model_folder: str
+    model_hash: str
     checkpoint_path: str
     config_path: str
 
-    def __init__(self, model_name, model_folder, checkpoint_path, config_path):
+    def __init__(self, model_name, model_folder, model_hash,checkpoint_path, config_path):
         self.model_name = model_name
         self.model_folder = model_folder
+        self.model_hash = model_hash
         self.checkpoint_path = checkpoint_path
         self.config_path = config_path
         self.custom_symbols = None
@@ -89,7 +91,7 @@ class VITSModel:
 
 
 vits_model_list: Dict[str, VITSModelInfo] = {}
-curr_vits_model: VITSModel
+curr_vits_model: VITSModel = None
 
 
 def get_model() -> VITSModel:
@@ -115,9 +117,11 @@ def refresh_list():
         if not config_path:
             print(f"Path {p} does not have a config file, pass")
             continue
+        
         vits_model_list[d] = VITSModelInfo(
             model_name=d,
             model_folder=p,
+            model_hash=model_hash(pth_path),
             checkpoint_path=pth_path,
             config_path=config_path
         )
@@ -126,21 +130,16 @@ def refresh_list():
 
 
 def init_load_model():
-    global curr_vits_model, vits_model_list
     info = next(iter(vits_model_list.values()))
-    print(f"Loading weights from {info.model_folder}...")
-    m = VITSModel(info)
-    m.load_model()
-    curr_vits_model = m
-    print("Model loaded.")
+    load_model(info.model_name)
 
 
 def load_model(model_name: str):
     global curr_vits_model, vits_model_list
-    if curr_vits_model.model_name == model_name:
+    if curr_vits_model and curr_vits_model.model_name == model_name:
         return
     info = vits_model_list[model_name]
-    print(f"Loading weights from {info.model_folder}...")
+    print(f"Loading weights [{info.model_hash}] from {info.checkpoint_path}...")
     m = VITSModel(info)
     m.load_model()
     curr_vits_model = m
