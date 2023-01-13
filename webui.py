@@ -1,3 +1,6 @@
+# 転がる岩、君に朝が降る
+# Code with Love by @Akegarasu
+
 import os
 import sys
 import modules.safe
