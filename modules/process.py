@@ -10,7 +10,7 @@ from vits.text import text_to_sequence
 def text2speech(text: str, speaker, speed):
     speaker_id = vits_model.curr_vits_model.speakers.index(speaker)
     result = process_vits(model=vits_model.curr_vits_model,
-                        text=text, speaker_id=speaker_id, speed=speed)
+                          text=text, speaker_id=speaker_id, speed=speed)
     torch_gc()
     return result
 

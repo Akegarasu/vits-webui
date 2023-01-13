@@ -10,4 +10,3 @@ parser.add_argument("--device-id", type=str, help="select the default CUDA devic
 parser.add_argument("--cpu", action='store_true', help="use cpu")
 
 cmd_opts = parser.parse_args()
-

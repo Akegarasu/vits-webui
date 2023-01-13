@@ -14,6 +14,7 @@ from typing import List, Dict
 # todo: cmdline here
 MODEL_PATH = os.path.join(os.path.join(os.getcwd(), "models"), "vits")
 
+
 class VITSModelInfo:
     model_name: str
     model_folder: str
@@ -21,13 +22,14 @@ class VITSModelInfo:
     checkpoint_path: str
     config_path: str
 
-    def __init__(self, model_name, model_folder, model_hash,checkpoint_path, config_path):
+    def __init__(self, model_name, model_folder, model_hash, checkpoint_path, config_path):
         self.model_name = model_name
         self.model_folder = model_folder
         self.model_hash = model_hash
         self.checkpoint_path = checkpoint_path
         self.config_path = config_path
         self.custom_symbols = None
+
 
 class VITSModel:
     model: SynthesizerTrn
@@ -77,7 +79,6 @@ class VITSModel:
         self.hps = hps
         self.symbols = _symbols
 
-
     def load_custom_symbols(self, symbol_path):
         if os.path.exists(symbol_path):
             spec = importlib.util.spec_from_file_location('symbols', symbol_path)
@@ -117,7 +118,7 @@ def refresh_list():
         if not config_path:
             print(f"Path {p} does not have a config file, pass")
             continue
-        
+
         vits_model_list[d] = VITSModelInfo(
             model_name=d,
             model_folder=p,

@@ -9,6 +9,7 @@ def search_ext_file(path: str, ext: str) -> Optional[str]:
             return os.path.join(path, f)
     return None
 
+
 def model_hash(filename):
     try:
         with open(filename, "rb") as file:
