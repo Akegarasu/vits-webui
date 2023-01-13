@@ -8,5 +8,6 @@ parser.add_argument("--server-name", type=str, help="sets hostname of server", d
 parser.add_argument("--autolaunch", action='store_true', help="open the webui URL in the system's default browser upon launch", default=False)
 parser.add_argument("--device-id", type=str, help="select the default CUDA device to use", default=None)
 parser.add_argument("--cpu", action='store_true', help="use cpu")
+parser.add_argument("--disable-safe-unpickle", action='store_true', help="disable safe unpickle")
 
 cmd_opts = parser.parse_args()

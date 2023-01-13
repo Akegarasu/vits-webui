@@ -74,9 +74,8 @@ class VITSModel:
         model, _, _, _ = load_checkpoint(checkpoint_path=self.checkpoint_path,
                                          model=model, optimizer=None)
         model.eval().to(devices.device)
-        self.speaker_ids = [sid for sid, name in enumerate(hps.speakers) if name != "None"]
-        self.speakers = [name for sid, name in enumerate(hps.speakers) if name != "None"]
 
+        self.speakers = [name for sid, name in enumerate(hps.speakers) if name != "None"]
         self.model = model
         self.hps = hps
         self.symbols = _symbols

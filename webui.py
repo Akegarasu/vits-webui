@@ -1,5 +1,6 @@
 import os
 import sys
+import modules.safe
 from modules.ui import create_ui
 
 from modules.vits_model import refresh_list, init_load_model
