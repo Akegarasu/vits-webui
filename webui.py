@@ -10,9 +10,6 @@ from modules.vits_model import refresh_list, init_load_model
 from modules.options import cmd_opts
 
 
-# todo: 批量处理，说话人，inline指定语言cleaner，手动输入symbol，preprocess，
-
-
 def init():
     print(f"Launching webui with arguments: {' '.join(sys.argv[1:])}")
     ensure_output_dirs()
