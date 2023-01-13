@@ -125,7 +125,7 @@ def load_with_extra(filename, extra_handler=None, *args, **kwargs):
     The alternative to this is just to use safe.unsafe_torch_load('model.pt'), which as the name implies is
     definitely unsafe.
     """
-    from options import cmd_opts
+    from modules.options import cmd_opts
     try:
         if not cmd_opts.disable_safe_unpickle:
             check_pt(filename, extra_handler)
