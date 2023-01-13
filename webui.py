@@ -18,8 +18,12 @@ def init():
 
 
 def ensure_output_dirs():
-    if not os.path.exists("outputs/vits"):
-        os.makedirs("outputs/vits")
+    def check_and_create(p):
+        if not os.path.exists(p):
+            os.makedirs(p)
+
+    check_and_create("outputs/vits")
+    check_and_create("outputs/vits-batch")
 
 
 def run():
