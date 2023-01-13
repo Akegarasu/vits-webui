@@ -1,9 +1,10 @@
 import gradio as gr
+import torch
 import os.path
 import importlib.util
 import vits.utils
 
-from modules.device import device
+import modules.devices as devices
 from vits.models import SynthesizerTrn
 from vits.utils import HParams
 from vits.text.symbols import symbols as builtin_symbols
@@ -70,8 +71,9 @@ class VITSModel:
             hps.train.segment_size // hps.data.hop_length,
             n_speakers=hps.data.n_speakers,
             **hps.model)
-        vits.utils.load_checkpoint(self.checkpoint_path, model, None)
-        model.eval().to(device)
+        model, _, _, _ = load_checkpoint(checkpoint_path=self.checkpoint_path,
+                                         model=model, optimizer=None)
+        model.eval().to(devices.device)
         self.speaker_ids = [sid for sid, name in enumerate(hps.speakers) if name != "None"]
         self.speakers = [name for sid, name in enumerate(hps.speakers) if name != "None"]
 
@@ -145,3 +147,28 @@ def load_model(model_name: str):
     m.load_model()
     curr_vits_model = m
     print("Model loaded.")
+
+
+def load_checkpoint(checkpoint_path, model, optimizer=None):
+    assert os.path.isfile(checkpoint_path)
+    checkpoint_dict = torch.load(checkpoint_path, map_location='cpu')
+    iteration = checkpoint_dict['iteration']
+    learning_rate = checkpoint_dict['learning_rate']
+    if optimizer is not None:
+        optimizer.load_state_dict(checkpoint_dict['optimizer'])
+    saved_state_dict = checkpoint_dict['model']
+    if hasattr(model, 'module'):
+        state_dict = model.module.state_dict()
+    else:
+        state_dict = model.state_dict()
+    new_state_dict = {}
+    for k, v in state_dict.items():
+        try:
+            new_state_dict[k] = saved_state_dict[k]
+        except:
+            new_state_dict[k] = v
+    if hasattr(model, 'module'):
+        model.module.load_state_dict(new_state_dict)
+    else:
+        model.load_state_dict(new_state_dict)
+    return model, optimizer, learning_rate, iteration

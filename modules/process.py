@@ -1,7 +1,7 @@
 from torch import no_grad, LongTensor
 
 import modules.vits_model as vits_model
-from modules.device import device, torch_gc
+from modules.devices import device, torch_gc
 from modules.vits_model import VITSModel
 from vits import commons
 from vits.text import text_to_sequence
