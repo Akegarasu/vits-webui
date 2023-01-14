@@ -89,7 +89,6 @@ class VITSModel:
                 print(f"Loading symbol file {symbol_path} failed, so such attr")
                 return
             self.custom_symbols = _sym
-        # todo: custom path
 
 
 vits_model_list: Dict[str, VITSModelInfo] = {}

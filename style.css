@@ -2,8 +2,10 @@
     max-width: 100%;
 }
 
-#generate {
-    min-height: 4.5em;
+#vits_generate {
+    min-height: 6.5em;
+    margin-top: 0.5em;
+    margin-right: 0.25em;
 }
 
 

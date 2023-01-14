@@ -9,6 +9,7 @@ from modules.process import text2speech
 refresh_symbol = "\U0001f504"  # 🔄
 
 component_dict = {}
+_gradio_template_response_orig = gr.routes.templates.TemplateResponse
 
 
 class ToolButton(gr.Button, gr.components.FormComponent):
@@ -46,6 +47,7 @@ def change_model(model_name):
 
 def create_ui():
     css = "style.css"
+    reload_javascript()
     curr_model_list = get_model_list()
     speakers = vits_model.curr_vits_model.speakers
     with gr.Blocks(analytics_enabled=False) as txt2img_interface:
@@ -109,3 +111,22 @@ def create_ui():
                     interface.render()
 
     return demo
+
+
+def reload_javascript():
+    with open("script.js", "r", encoding="utf8") as jsfile:
+        javascript = f'<script>{jsfile.read()}</script>'
+
+    # if cmd_opts.theme is not None:
+    #     javascript += f"\n<script>set_theme('{cmd_opts.theme}');</script>\n"
+
+    # javascript += f"\n<script>{localization.localization_js(shared.opts.localization)}</script>"
+
+    def template_response(*args, **kwargs):
+        res = _gradio_template_response_orig(*args, **kwargs)
+        res.body = res.body.replace(
+            b'</head>', f'{javascript}</head>'.encode("utf8"))
+        res.init_headers()
+        return res
+
+    gr.routes.templates.TemplateResponse = template_response
