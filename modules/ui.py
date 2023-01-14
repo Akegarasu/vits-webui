@@ -1,3 +1,5 @@
+import os.path
+
 import gradio as gr
 
 import modules.vits_model as vits_model
@@ -10,6 +12,7 @@ folder_symbol = '\U0001f4c2'  # 📂
 
 component_dict = {}
 _gradio_template_response_orig = gr.routes.templates.TemplateResponse
+script_path = "scripts"
 
 
 class ToolButton(gr.Button, gr.components.FormComponent):
@@ -114,8 +117,12 @@ def create_ui():
             ]
         )
 
+    with gr.Blocks(analytics_enabled=False) as sovits_interface:
+        gr.Markdown("# 请等待更新~")
+
     interfaces = [
-        (txt2img_interface, "VITS", "vits")
+        (txt2img_interface, "VITS", "vits"),
+        (sovits_interface, "SO-VITS (dev)", "sovits")
     ]
 
     with gr.Blocks(css=css, analytics_enabled=False, title="VITS") as demo:
@@ -128,14 +135,22 @@ def create_ui():
 
 
 def reload_javascript():
+    scripts_list = [os.path.join(script_path, i) for i in os.listdir(script_path) if i.endswith(".js")]
     with open("script.js", "r", encoding="utf8") as jsfile:
         javascript = f'<script>{jsfile.read()}</script>'
+
+    for path in scripts_list:
+        with open(path, "r", encoding="utf8") as jsfile:
+            javascript += f"\n<script>{jsfile.read()}</script>"
+
+    # todo: localization
+    with open("localizations/zh_cn.json", "r", encoding="utf8") as lf:
+        localization_file = lf.read()
+    javascript += f"\n<script>var localization={localization_file}</script>"
 
     # todo: theme
     # if cmd_opts.theme is not None:
     #     javascript += f"\n<script>set_theme('{cmd_opts.theme}');</script>\n"
-    # todo: localization
-    # javascript += f"\n<script>{localization.localization_js(shared.opts.localization)}</script>"
 
     def template_response(*args, **kwargs):
         res = _gradio_template_response_orig(*args, **kwargs)
