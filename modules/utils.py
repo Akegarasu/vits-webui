@@ -1,4 +1,6 @@
 import os
+import platform
+import subprocess
 from typing import Optional
 
 
@@ -21,3 +23,21 @@ def model_hash(filename):
             return m.hexdigest()[0:8]
     except FileNotFoundError:
         return 'FileNotFound'
+
+
+def open_folder(f):
+    if not os.path.exists(f):
+        print(f'Folder "{f}" does not exist.')
+        return
+    elif not os.path.isdir(f):
+        return
+
+    path = os.path.normpath(f)
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    elif "microsoft-standard-WSL2" in platform.uname().release:
+        subprocess.Popen(["wsl-open", path])
+    else:
+        subprocess.Popen(["xdg-open", path])

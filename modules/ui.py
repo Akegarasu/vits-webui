@@ -1,12 +1,12 @@
 import gradio as gr
-import gradio.utils as gr_utils
-import gradio.processing_utils as gr_processing_utils
-import modules.vits_model as vits_model
-from modules.vits_model import vits_model_list, get_model_list, refresh_list, get_model
 
+import modules.vits_model as vits_model
 from modules.process import text2speech
+from modules.utils import open_folder
+from modules.vits_model import get_model_list, refresh_list
 
 refresh_symbol = "\U0001f504"  # 🔄
+folder_symbol = '\U0001f4c2'  # 📂
 
 component_dict = {}
 _gradio_template_response_orig = gr.routes.templates.TemplateResponse
@@ -56,12 +56,11 @@ def create_ui():
                 with gr.Row():
                     with gr.Column(scale=80):
                         with gr.Row():
-                            input_text = gr.Textbox(label="Text", show_label=False, lines=2,
-                                                    placeholder="Text (press Ctrl+Enter or Alt+Enter to generate)"
-                                                    )
+                            input_text = gr.Textbox(label="Text", show_label=False, lines=4,
+                                                    placeholder="Text (press Ctrl+Enter or Alt+Enter to generate)")
             with gr.Column(scale=1):
                 with gr.Row():
-                    submit = gr.Button("Generate", elem_id=f"generate", variant="primary")
+                    submit = gr.Button("Generate", elem_id=f"vits_generate", variant="primary")
 
         with gr.Row().style(equal_height=False):
             with gr.Column(variant="panel", elem_id="vits_settings"):
@@ -71,15 +70,29 @@ def create_ui():
                     create_refresh_button(model_picker, refresh_method=refresh_list,
                                           refreshed_args=lambda: {"choices": get_model_list()},
                                           elem_id="vits-model-refresh")
-                speaker_index = gr.Dropdown(label="Speakers",
-                                            choices=speakers, value=speakers[0])
+                with gr.Row():
+                    process_method = gr.Radio(label="Process Method",
+                                              choices=["Simple", "Batch Process", "Multi Speakers"],
+                                              value="Simple")
 
-                speed = gr.Slider(value=1, minimum=0.5, maximum=2, step=0.1,
-                                  elem_id=f"vits_speed",
-                                  label="Speed", )
+                with gr.Row():
+                    speaker_index = gr.Dropdown(label="Speakers",
+                                                choices=speakers, value=speakers[0])
+
+                    speed = gr.Slider(value=1, minimum=0.5, maximum=2, step=0.1,
+                                      elem_id=f"vits_speed",
+                                      label="Speed")
+
             with gr.Column(variant="panel", elem_id="vits_output"):
                 tts_output1 = gr.Textbox(label="Output Message")
                 tts_output2 = gr.Audio(label="Output Audio", elem_id=f"vits_audio")
+
+                with gr.Column():
+                    with gr.Row(elem_id=f"functional_buttons"):
+                        open_folder_button = gr.Button(f"{folder_symbol} Open Folder", elem_id=f'open_vits_folder')
+                        save_button = gr.Button('Save', elem_id=f'save')
+
+                        open_folder_button.click(fn=lambda: open_folder("outputs/vits"))
 
         model_picker.change(
             fn=change_model,
@@ -93,6 +106,7 @@ def create_ui():
                 input_text,
                 speaker_index,
                 speed,
+                process_method
             ],
             outputs=[
                 tts_output1,
@@ -117,9 +131,10 @@ def reload_javascript():
     with open("script.js", "r", encoding="utf8") as jsfile:
         javascript = f'<script>{jsfile.read()}</script>'
 
+    # todo: theme
     # if cmd_opts.theme is not None:
     #     javascript += f"\n<script>set_theme('{cmd_opts.theme}');</script>\n"
-
+    # todo: localization
     # javascript += f"\n<script>{localization.localization_js(shared.opts.localization)}</script>"
 
     def template_response(*args, **kwargs):
