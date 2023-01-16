@@ -1,12 +1,12 @@
 {
-  "Text (press Ctrl+Enter or Alt+Enter to generate)": "Text (press Ctrl+Enter or Alt+Enter to generate)",
-  "Generate": "Generate",
-  "Speakers": "Speakers",
-  "VITS Checkpoint": "VITS Checkpoint",
-  "Process Method": "Process Method",
-  "Speed": "Speed",
-  "Output Message": "Output Message",
-  "Output Audio": "Output Audio",
-  "Open Folder": "Open Folder",
-  "Save": "Save"
+  "Text (press Ctrl+Enter or Alt+Enter to generate)": "文字 (按下 Ctrl+Enter 或 Alt+Enter 开始生成)",
+  "Generate": "生成",
+  "Speakers": "说话人",
+  "VITS Checkpoint": "VITS 模型",
+  "Process Method": "处理方式",
+  "Speed": "语速",
+  "Output Message": "输出信息",
+  "Output Audio": "输出音频",
+  "Open Folder": "打开文件夹",
+  "Save": "保存"
 }
