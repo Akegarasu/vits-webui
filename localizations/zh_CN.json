@@ -1,5 +1,12 @@
 {
   "Text (press Ctrl+Enter or Alt+Enter to generate)": "Text (press Ctrl+Enter or Alt+Enter to generate)",
   "Generate": "Generate",
-  "Speakers": "Speakers"
+  "Speakers": "Speakers",
+  "VITS Checkpoint": "VITS Checkpoint",
+  "Process Method": "Process Method",
+  "Speed": "Speed",
+  "Output Message": "Output Message",
+  "Output Audio": "Output Audio",
+  "Open Folder": "Open Folder",
+  "Save": "Save"
 }
