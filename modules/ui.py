@@ -144,7 +144,7 @@ def reload_javascript():
             javascript += f"\n<script>{jsfile.read()}</script>"
 
     # todo: localization
-    with open("localizations/zh_cn.json", "r", encoding="utf8") as lf:
+    with open("localizations/zh_CN.json", "r", encoding="utf8") as lf:
         localization_file = lf.read()
     javascript += f"\n<script>var localization={localization_file}</script>"
 
