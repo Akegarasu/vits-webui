@@ -6,11 +6,11 @@ import modules.vits_model as vits_model
 from modules.process import text2speech
 from modules.utils import open_folder
 from modules.vits_model import get_model_list, refresh_list
+from modules.options import opts
 
 refresh_symbol = "\U0001f504"  # 🔄
 folder_symbol = '\U0001f4c2'  # 📂
 
-component_dict = {}
 _gradio_template_response_orig = gr.routes.templates.TemplateResponse
 script_path = "scripts"
 
@@ -42,6 +42,38 @@ def create_refresh_button(refresh_component, refresh_method, refreshed_args, ele
     return refresh_button
 
 
+def create_setting_component(key):
+    def fun():
+        return opts.data[key] if key in opts.data else opts.data_labels[key].default
+
+    info = opts.data_labels[key]
+    t = type(info.default)
+
+    args = info.component_args() if callable(info.component_args) else info.component_args
+
+    if info.component is not None:
+        comp = info.component
+    elif t == str:
+        comp = gr.Textbox
+    elif t == int:
+        comp = gr.Number
+    elif t == bool:
+        comp = gr.Checkbox
+    else:
+        raise Exception(f'bad options item type: {str(t)} for key {key}')
+
+    elem_id = "setting_" + key
+
+    if info.refresh is not None:
+        with gr.Row():
+            res = comp(label=info.label, value=fun(), elem_id=elem_id, **(args or {}))
+            create_refresh_button(res, info.refresh, info.component_args, "refresh_" + key)
+    else:
+        res = comp(label=info.label, value=fun(), elem_id=elem_id, **(args or {}))
+
+    return res
+
+
 def change_model(model_name):
     vits_model.load_model(model_name)
     speakers = vits_model.curr_vits_model.speakers
@@ -50,9 +82,11 @@ def change_model(model_name):
 
 def create_ui():
     css = "style.css"
+    component_dict = {}
     reload_javascript()
     curr_model_list = get_model_list()
     speakers = vits_model.curr_vits_model.speakers
+
     with gr.Blocks(analytics_enabled=False) as txt2img_interface:
         with gr.Row(elem_id="toprow"):
             with gr.Column(scale=6):
@@ -120,9 +154,48 @@ def create_ui():
     with gr.Blocks(analytics_enabled=False) as sovits_interface:
         gr.Markdown("# 请等待更新~")
 
+    with gr.Blocks(analytics_enabled=False) as settings_interface:
+        settings_component = []
+
+        def run_settings(*args):
+            changed = []
+
+            for key, value, comp in zip(opts.data_labels.keys(), args, settings_component):
+                assert opts.same_type(value, opts.data_labels[key].default), f"Bad value for setting {key}: {value}; expecting {type(opts.data_labels[key].default).__name__}"
+
+            for key, value, comp in zip(opts.data_labels.keys(), args, settings_component):
+                if opts.set(key, value):
+                    changed.append(key)
+
+            try:
+                opts.save()
+            except RuntimeError:
+                return f'{len(changed)} settings changed without save: {", ".join(changed)}.'
+            return f'{len(changed)} settings changed{": " if len(changed) > 0 else ""}{", ".join(changed)}.'
+
+        with gr.Row():
+            with gr.Column(scale=6):
+                settings_submit = gr.Button(value="Apply settings", variant='primary', elem_id="settings_submit")
+            with gr.Column():
+                restart_gradio = gr.Button(value='Reload UI', variant='primary', elem_id="settings_restart_gradio")
+
+        settings_result = gr.HTML(elem_id="settings_result")
+
+        for i, (k, item) in enumerate(opts.data_labels.items()):
+            component = create_setting_component(k)
+            component_dict[k] = component
+            settings_component.append(component)
+
+        settings_submit.click(
+            fn=run_settings,
+            inputs=settings_component,
+            outputs=[settings_result],
+        )
+
     interfaces = [
         (txt2img_interface, "VITS", "vits"),
-        (sovits_interface, "SO-VITS (dev)", "sovits")
+        (sovits_interface, "SO-VITS (dev)", "sovits"),
+        (settings_interface, "Settings", "settings")
     ]
 
     with gr.Blocks(css=css, analytics_enabled=False, title="VITS") as demo:
@@ -130,6 +203,17 @@ def create_ui():
             for interface, label, ifid in interfaces:
                 with gr.TabItem(label, id=ifid, elem_id="tab_" + ifid):
                     interface.render()
+
+        component_keys = [k for k in opts.data_labels.keys() if k in component_dict]
+
+        def get_settings_values():
+            return [getattr(opts, key) for key in component_keys]
+
+        demo.load(
+            fn=get_settings_values,
+            inputs=[],
+            outputs=[component_dict[k] for k in component_keys],
+        )
 
     return demo
 
