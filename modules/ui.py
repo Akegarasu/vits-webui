@@ -7,6 +7,7 @@ from modules.process import text2speech
 from modules.utils import open_folder
 from modules.vits_model import get_model_list, refresh_list
 from modules.options import opts
+from modules.localization import gen_localization_js
 
 refresh_symbol = "\U0001f504"  # 🔄
 folder_symbol = '\U0001f4c2'  # 📂
@@ -206,14 +207,14 @@ def create_ui():
 
         component_keys = [k for k in opts.data_labels.keys() if k in component_dict]
 
-        def get_settings_values():
-            return [getattr(opts, key) for key in component_keys]
-
-        demo.load(
-            fn=get_settings_values,
-            inputs=[],
-            outputs=[component_dict[k] for k in component_keys],
-        )
+        # def get_settings_values():
+        #     return [getattr(opts, key) for key in component_keys]
+        #
+        # demo.load(
+        #     fn=get_settings_values,
+        #     inputs=[],
+        #     outputs=[component_dict[k] for k in component_keys],
+        # )
 
     return demo
 
@@ -227,9 +228,7 @@ def reload_javascript():
         with open(path, "r", encoding="utf8") as jsfile:
             javascript += f"\n<script>{jsfile.read()}</script>"
 
-    with open(os.path.join("localizations", opts.localization), "r", encoding="utf8") as lf:
-        localization_file = lf.read()
-    javascript += f"\n<script>var localization={localization_file}</script>"
+    javascript += gen_localization_js(opts.localization)
 
     # todo: theme
     # if cmd_opts.theme is not None:
