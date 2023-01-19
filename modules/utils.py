@@ -3,6 +3,8 @@ import platform
 import subprocess
 from typing import Optional
 
+import re
+
 
 def search_ext_file(path: str, ext: str) -> Optional[str]:
     files = os.listdir(path)
@@ -41,3 +43,7 @@ def open_folder(f):
         subprocess.Popen(["wsl-open", path])
     else:
         subprocess.Popen(["xdg-open", path])
+
+
+def windows_filename(s: str):
+    return re.sub('[<>:"\/\\|?*\n\t\r]+', "", s, flags=-1)

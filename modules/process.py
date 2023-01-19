@@ -7,6 +7,7 @@ import re
 import modules.vits_model as vits_model
 from modules.devices import device, torch_gc
 from modules.vits_model import VITSModel
+from modules.utils import windows_filename
 from vits import commons
 from vits.text import text_to_sequence
 
@@ -49,6 +50,7 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     err = task.preprocess()
     if err:
         return err, None
+    ti = int(time.time())
     save_path = ""
     output_info = "Success saved to "
     outputs = []
@@ -56,9 +58,10 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
         sample_rate, data = process_vits(model=vits_model.curr_vits_model,
                                          text=t[1], speaker_id=t[0], speed=speed)
         outputs.append(data)
-        save_path = f"outputs/vits/{str(int(time.time()))}.wav"
+        save_path = f"outputs/vits/{str(ti)}-{windows_filename(t[1])}.wav"
         wavfile.write(save_path, sample_rate, data)
         output_info += f"\n{save_path}"
+        ti += 1
 
     torch_gc()
 
