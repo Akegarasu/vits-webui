@@ -18,7 +18,6 @@ cn2an
 protobuf
 inflect
 eng_to_ipa
-ko_pron
 indic_transliteration
 num_thai
 opencc

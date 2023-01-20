@@ -77,7 +77,7 @@ def create_setting_component(key):
 
 def change_model(model_name):
     vits_model.load_model(model_name)
-    speakers = vits_model.curr_vits_model.speakers
+    speakers = vits_model.get_speakers()
     return gr.update(choices=speakers, value=speakers[0])
 
 
@@ -85,8 +85,9 @@ def create_ui():
     css = "style.css"
     component_dict = {}
     reload_javascript()
-    curr_model_list = get_model_list()
-    speakers = vits_model.get_speakers()
+
+    vits_model_list = vits_model.get_model_list()
+    vits_speakers = vits_model.get_speakers()
 
     with gr.Blocks(analytics_enabled=False) as txt2img_interface:
         with gr.Row(elem_id="toprow"):
@@ -103,7 +104,7 @@ def create_ui():
         with gr.Row().style(equal_height=False):
             with gr.Column(variant="panel", elem_id="vits_settings"):
                 with gr.Row():
-                    model_picker = gr.Dropdown(label="VITS Checkpoint", choices=curr_model_list,
+                    model_picker = gr.Dropdown(label="VITS Checkpoint", choices=vits_model_list,
                                                value=vits_model.get_model_name())
                     create_refresh_button(model_picker, refresh_method=refresh_list,
                                           refreshed_args=lambda: {"choices": vits_model.get_model_list()},
@@ -115,7 +116,7 @@ def create_ui():
 
                 with gr.Row():
                     speaker_index = gr.Dropdown(label="Speakers",
-                                                choices=speakers, value=speakers[0])
+                                                choices=vits_speakers, value=vits_speakers[0])
 
                     speed = gr.Slider(value=1, minimum=0.5, maximum=2, step=0.1,
                                       elem_id=f"vits_speed",
@@ -163,7 +164,7 @@ def create_ui():
         with gr.Row().style(equal_height=False):
             with gr.Column(variant="panel", elem_id="so_vits_settings"):
                 with gr.Row():
-                    model_picker = gr.Dropdown(label="SO-VITS Checkpoint", choices=curr_model_list,
+                    model_picker = gr.Dropdown(label="SO-VITS Checkpoint", choices=vits_model_list,
                                                value=vits_model.get_model_name())
                     create_refresh_button(model_picker, refresh_method=refresh_list,
                                           refreshed_args=lambda: {"choices": get_model_list()},
@@ -171,11 +172,11 @@ def create_ui():
 
                 with gr.Row():
                     sovits_speaker_index = gr.Dropdown(label="Speakers",
-                                                       choices=speakers, value=speakers[0])
+                                                       choices=vits_speakers, value=vits_speakers[0])
 
-                    speed = gr.Slider(value=1, minimum=0.5, maximum=2, step=0.1,
-                                      elem_id=f"vits_speed",
-                                      label="Speed")
+                    vc_transform = gr.Slider(value=0, minimum=-20, maximum=20, step=1,
+                                             elem_id=f"vc_transform",
+                                             label="VC Transform")
 
             with gr.Column(variant="panel", elem_id="vits_output"):
                 sovits_output1 = gr.Textbox(label="Output Message")
