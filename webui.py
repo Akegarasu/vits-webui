@@ -3,18 +3,22 @@
 
 import os
 import sys
-import modules.safe
-from modules.ui import create_ui
 
-from modules.vits_model import refresh_list, init_load_model
+# must import before other modules load model.
+import modules.safe
+
+from modules.ui import create_ui
+import modules.vits_model as vits_model
 from modules.options import cmd_opts
 
 
 def init():
     print(f"Launching webui with arguments: {' '.join(sys.argv[1:])}")
     ensure_output_dirs()
-    refresh_list()
-    init_load_model()
+    vits_model.refresh_list()
+    if cmd_opts.ui_debug_mode:
+        return
+    vits_model.init_load_model()
 
 
 def ensure_output_dirs():
@@ -24,6 +28,7 @@ def ensure_output_dirs():
 
     check_and_create("outputs/vits")
     check_and_create("outputs/vits-batch")
+    check_and_create("outputs/sovits")
 
 
 def run():

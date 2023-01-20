@@ -17,6 +17,7 @@ parser.add_argument("--device-id", type=str, help="select the default CUDA devic
 parser.add_argument("--cpu", action='store_true', help="use cpu")
 parser.add_argument("--disable-safe-unpickle", action='store_true', help="disable safe unpickle")
 parser.add_argument("--freeze-settings", action='store_true', help="freeze settings")
+parser.add_argument("--ui-debug-mode", action='store_true', help="Don't load model to quickly launch UI")
 
 cmd_opts = parser.parse_args()
 
