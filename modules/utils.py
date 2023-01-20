@@ -1,9 +1,11 @@
 import os
 import platform
+import re
 import subprocess
 from typing import Optional
 
-import re
+# for export
+from vits.utils import get_hparams_from_file, HParams
 
 
 def search_ext_file(path: str, ext: str) -> Optional[str]:

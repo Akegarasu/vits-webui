@@ -5,5 +5,7 @@ __pycache__
 venv
 
 models/vits/**
+models/sovits/**
+models/hubert/**
 
 outputs/*
