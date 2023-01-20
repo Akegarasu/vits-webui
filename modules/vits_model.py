@@ -99,8 +99,16 @@ def get_model() -> VITSModel:
     return curr_vits_model
 
 
+def get_model_name():
+    return curr_vits_model.model_name if curr_vits_model is not None else None
+
+
 def get_model_list():
     return [k for k, _ in vits_model_list.items()]
+
+
+def get_speakers():
+    return curr_vits_model.speakers if curr_vits_model is not None else ["None"]
 
 
 def refresh_list():
