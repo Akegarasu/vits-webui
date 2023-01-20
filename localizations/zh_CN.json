@@ -1,4 +1,6 @@
 {
+  "Drop Audio Here": "Drop Audio Here",
+  "Click to Upload": "Click to Upload",
   "Text (press Ctrl+Enter or Alt+Enter to generate)": "文字 (按下 Ctrl+Enter 或 Alt+Enter 开始生成)",
   "Generate": "生成",
   "Speakers": "说话人",
@@ -9,9 +11,9 @@
   "Output Audio": "输出音频",
   "Open Folder": "打开文件夹",
   "Save": "保存",
-  "Simple": "",
-  "Batch Process": "",
-  "Multi Speakers": "",
-  "Apply settings": "",
-  "Reload UI": ""
+  "Simple": "Simple",
+  "Batch Process": "Batch Process",
+  "Multi Speakers": "Multi Speakers",
+  "Apply settings": "Apply settings",
+  "Reload UI": "Reload UI"
 }
