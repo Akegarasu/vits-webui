@@ -1,4 +1,7 @@
 {
+  "Drop Audio Here": "Drop Audio Here",
+  "Click to Upload": "Click to Upload",
+
   "Text (press Ctrl+Enter or Alt+Enter to generate)": "Text (press Ctrl+Enter or Alt+Enter to generate)",
   "Generate": "Generate",
   "Speakers": "Speakers",
@@ -9,9 +12,9 @@
   "Output Audio": "Output Audio",
   "Open Folder": "Open Folder",
   "Save": "Save",
-  "Simple": "",
-  "Batch Process": "",
-  "Multi Speakers": "",
-  "Apply settings": "",
-  "Reload UI": ""
+  "Simple": "Simple",
+  "Batch Process": "Batch Process",
+  "Multi Speakers": "Multi Speakers",
+  "Apply settings": "Apply settings",
+  "Reload UI": "Reload UI"
 }
