@@ -2,12 +2,15 @@
     max-width: 100%;
 }
 
-#vits_generate {
+[id$=_generate] {
     min-height: 6.5em;
     margin-top: 0.5em;
     margin-right: 0.25em;
 }
 
+/*#sovits_audio_panel {*/
+/*    min-height: 5.5em;*/
+/*}*/
 
 #sh {
     min-width: 2em;

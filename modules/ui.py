@@ -86,7 +86,7 @@ def create_ui():
     component_dict = {}
     reload_javascript()
     curr_model_list = get_model_list()
-    speakers = vits_model.curr_vits_model.speakers
+    speakers = vits_model.get_speakers()
 
     with gr.Blocks(analytics_enabled=False) as txt2img_interface:
         with gr.Row(elem_id="toprow"):
@@ -104,9 +104,9 @@ def create_ui():
             with gr.Column(variant="panel", elem_id="vits_settings"):
                 with gr.Row():
                     model_picker = gr.Dropdown(label="VITS Checkpoint", choices=curr_model_list,
-                                               value=vits_model.curr_vits_model.model_name)
+                                               value=vits_model.get_model_name())
                     create_refresh_button(model_picker, refresh_method=refresh_list,
-                                          refreshed_args=lambda: {"choices": get_model_list()},
+                                          refreshed_args=lambda: {"choices": vits_model.get_model_list()},
                                           elem_id="vits-model-refresh")
                 with gr.Row():
                     process_method = gr.Radio(label="Process Method",
@@ -153,7 +153,33 @@ def create_ui():
         )
 
     with gr.Blocks(analytics_enabled=False) as sovits_interface:
-        gr.Markdown("# 请等待更新~")
+        with gr.Row():
+            with gr.Column(scale=6, elem_id="sovits_audio_panel"):
+                sovits_audio_input = gr.Audio(label="Upload Audio File", elem_id=f"sovits_input_audio")
+            with gr.Column(scale=1):
+                with gr.Row():
+                    submit = gr.Button("Generate", elem_id=f"sovits_generate", variant="primary")
+
+        with gr.Row().style(equal_height=False):
+            with gr.Column(variant="panel", elem_id="so_vits_settings"):
+                with gr.Row():
+                    model_picker = gr.Dropdown(label="SO-VITS Checkpoint", choices=curr_model_list,
+                                               value=vits_model.get_model_name())
+                    create_refresh_button(model_picker, refresh_method=refresh_list,
+                                          refreshed_args=lambda: {"choices": get_model_list()},
+                                          elem_id="vits-model-refresh")
+
+                with gr.Row():
+                    sovits_speaker_index = gr.Dropdown(label="Speakers",
+                                                       choices=speakers, value=speakers[0])
+
+                    speed = gr.Slider(value=1, minimum=0.5, maximum=2, step=0.1,
+                                      elem_id=f"vits_speed",
+                                      label="Speed")
+
+            with gr.Column(variant="panel", elem_id="vits_output"):
+                sovits_output1 = gr.Textbox(label="Output Message")
+                sovits_output2 = gr.Audio(label="Output Audio", elem_id=f"sovits_output_audio")
 
     with gr.Blocks(analytics_enabled=False) as settings_interface:
         settings_component = []
