@@ -35,18 +35,17 @@ class Svc(object):
         for spk, sid in self.hps_ms.spk.items():
             self.speakers[sid] = spk
         self.spk2id = self.hps_ms.spk
-        self.hubert_soft = hubert_model.hubert_soft(hubert_path)
-        if torch.cuda.is_available():
-            self.hubert_soft = self.hubert_soft.cuda()
-        # self.load_model()
 
     def load_model(self):
+        self.hubert_soft = hubert_model.hubert_soft(self.hubert_path)
+        if self.dev != torch.device("cpu"):
+            self.hubert_soft = self.hubert_soft.cuda()
         self.net_g_ms = SynthesizerTrn(
             self.hps_ms.data.filter_length // 2 + 1,
             self.hps_ms.train.segment_size // self.hps_ms.data.hop_length,
             **self.hps_ms.model)
         _ = load_checkpoint(self.net_g_path, self.net_g_ms, None)
-        if "half" in self.net_g_path and torch.cuda.is_available():
+        if "half" in self.net_g_path and self.dev != torch.device("cpu"):
             _ = self.net_g_ms.half().eval().to(self.dev)
         else:
             _ = self.net_g_ms.eval().to(self.dev)
@@ -94,9 +93,6 @@ class SovitsModel(Svc):
         super(SovitsModel, self).__init__(info.checkpoint_path, info.config_path)
         self.model_name = info.model_name
 
-    # def load_model(self):
-    #     super(SovitsModel, self).load_model()
-
 
 sovits_model_list: Dict[str, ModelInfo] = {}
 curr_sovits_model: SovitsModel = None
@@ -135,8 +131,8 @@ def refresh_list():
             checkpoint_path=pth_path,
             config_path=config_path
         )
-    # if len(sovits_model_list.items()) == 0:
-    #     raise "Please put a model in models/sovits"
+    if len(sovits_model_list.items()) == 0:
+        print("No so-vits model found. Please put a model in models/sovits")
 
 
 # def init_model():

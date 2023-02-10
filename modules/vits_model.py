@@ -97,20 +97,8 @@ def get_speakers():
 
 def refresh_list():
     vits_model_list.clear()
-    # dirs = os.listdir(MODEL_PATH)
     model_list = refresh_model_list(model_path=MODEL_PATH)
     for m in model_list:
-        # p = os.path.join(MODEL_PATH, d)
-        # if not os.path.isdir(p):
-        #     continue
-        # pth_path = search_ext_file(p, ".pth")
-        # if not pth_path:
-        #     print(f"Path {p} does not have a pth file, pass")
-        #     continue
-        # config_path = search_ext_file(p, ".json")
-        # if not config_path:
-        #     print(f"Path {p} does not have a config file, pass")
-        #     continue
         d = m["dir"]
         p = os.path.join(MODEL_PATH, m["dir"])
         pth_path = m["pth"]
@@ -123,7 +111,7 @@ def refresh_list():
             config_path=config_path
         )
     if len(vits_model_list.items()) == 0:
-        raise "Please put a model in models/vits"
+        print("No vits model found. Please put a model in models/vits")
 
 
 def init_load_model():
