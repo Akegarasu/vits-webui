@@ -9,6 +9,7 @@ import scipy.io.wavfile as wavfile
 import soundfile
 from torch import no_grad, LongTensor
 
+import modules.sovits_model as sovits_model
 import modules.vits_model as vits_model
 from modules.devices import device, torch_gc
 from modules.sovits_model import Svc as SovitsSvc
@@ -52,6 +53,7 @@ class Text2SpeechTask:
 
 
 class SovitsTask:
+    # 暂时貌似没有需要 preprocess 的，就先放这里了
     pass
 
 
@@ -82,8 +84,11 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     return output_info, save_path
 
 
-def sovits_process():
-    pass
+def sovits_process(audio, speaker: str, vc_transform: int):
+    return process_so_vits(svc_model=sovits_model.curr_sovits_model,
+                           sid=speaker,
+                           input_audio=audio,
+                           vc_transform=vc_transform)
 
 
 def text_processing(text, model: VITSModel):
