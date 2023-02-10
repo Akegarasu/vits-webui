@@ -48,4 +48,4 @@ def open_folder(f):
 
 
 def windows_filename(s: str):
-    return re.sub('[<>:"\/\\|?*\n\t\r]+', "", s, flags=-1)
+    return re.sub('[<>:"\/\\|?*\n\t\r]+', "", s)
