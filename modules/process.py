@@ -11,12 +11,11 @@ from torch import no_grad, LongTensor
 
 import modules.vits_model as vits_model
 from modules.devices import device, torch_gc
+from modules.sovits_model import Svc as SovitsSvc
 from modules.utils import windows_filename
 from modules.vits_model import VITSModel
 from vits import commons
 from vits.text import text_to_sequence
-
-from modules.sovits_model import Svc as SovitsSvc
 
 
 class Text2SpeechTask:

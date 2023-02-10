@@ -20,4 +20,4 @@ def insert_repositories_path():
             sys.path.append(p["p"])
 
 
-insert_repositories_path()
+# insert_repositories_path()

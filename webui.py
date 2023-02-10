@@ -10,6 +10,7 @@ import modules.path
 
 from modules.ui import create_ui
 import modules.vits_model as vits_model
+import modules.sovits_model as sovits_model
 from modules.options import cmd_opts
 
 
@@ -17,9 +18,11 @@ def init():
     print(f"Launching webui with arguments: {' '.join(sys.argv[1:])}")
     ensure_output_dirs()
     vits_model.refresh_list()
+    sovits_model.refresh_list()
     if cmd_opts.ui_debug_mode:
         return
-    vits_model.init_load_model()
+    # vits_model.init_model()
+    # sovits_model.init_model()
 
 
 def ensure_output_dirs():

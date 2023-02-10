@@ -1,35 +1,19 @@
-import gradio as gr
-import torch
-import os.path
 import importlib.util
-import vits.utils
+import os.path
+from typing import List, Dict
+
+import torch
 
 import modules.devices as devices
-from vits.models import SynthesizerTrn
-from vits.utils import HParams
-from vits.text.symbols import symbols as builtin_symbols
+import vits.utils
+from modules.model import ModelInfo, refresh_model_list
 from modules.utils import search_ext_file, model_hash
-
-from typing import List, Dict
+from vits.models import SynthesizerTrn
+from vits.text.symbols import symbols as builtin_symbols
+from vits.utils import HParams
 
 # todo: cmdline here
 MODEL_PATH = os.path.join(os.path.join(os.getcwd(), "models"), "vits")
-
-
-class VITSModelInfo:
-    model_name: str
-    model_folder: str
-    model_hash: str
-    checkpoint_path: str
-    config_path: str
-
-    def __init__(self, model_name, model_folder, model_hash, checkpoint_path, config_path):
-        self.model_name = model_name
-        self.model_folder = model_folder
-        self.model_hash = model_hash
-        self.checkpoint_path = checkpoint_path
-        self.config_path = config_path
-        self.custom_symbols = None
 
 
 class VITSModel:
@@ -44,7 +28,7 @@ class VITSModel:
 
     speakers: List[str]
 
-    def __init__(self, info: VITSModelInfo):
+    def __init__(self, info: ModelInfo):
         self.model_name = info.model_name
         self.model_folder = info.model_folder
         self.checkpoint_path = info.checkpoint_path
@@ -91,7 +75,7 @@ class VITSModel:
             self.custom_symbols = _sym
 
 
-vits_model_list: Dict[str, VITSModelInfo] = {}
+vits_model_list: Dict[str, ModelInfo] = {}
 curr_vits_model: VITSModel = None
 
 
@@ -113,21 +97,25 @@ def get_speakers():
 
 def refresh_list():
     vits_model_list.clear()
-    dirs = os.listdir(MODEL_PATH)
-    for d in dirs:
-        p = os.path.join(MODEL_PATH, d)
-        if not os.path.isdir(p):
-            continue
-        pth_path = search_ext_file(p, ".pth")
-        if not pth_path:
-            print(f"Path {p} does not have a pth file, pass")
-            continue
-        config_path = search_ext_file(p, ".json")
-        if not config_path:
-            print(f"Path {p} does not have a config file, pass")
-            continue
-
-        vits_model_list[d] = VITSModelInfo(
+    # dirs = os.listdir(MODEL_PATH)
+    model_list = refresh_model_list(model_path=MODEL_PATH)
+    for m in model_list:
+        # p = os.path.join(MODEL_PATH, d)
+        # if not os.path.isdir(p):
+        #     continue
+        # pth_path = search_ext_file(p, ".pth")
+        # if not pth_path:
+        #     print(f"Path {p} does not have a pth file, pass")
+        #     continue
+        # config_path = search_ext_file(p, ".json")
+        # if not config_path:
+        #     print(f"Path {p} does not have a config file, pass")
+        #     continue
+        d = m["dir"]
+        p = os.path.join(MODEL_PATH, m["dir"])
+        pth_path = m["pth"]
+        config_path = m["config"]
+        vits_model_list[d] = ModelInfo(
             model_name=d,
             model_folder=p,
             model_hash=model_hash(pth_path),
@@ -141,6 +129,13 @@ def refresh_list():
 def init_load_model():
     info = next(iter(vits_model_list.values()))
     load_model(info.model_name)
+
+
+def init_model():
+    global curr_vits_model
+    info = next(iter(vits_model_list.values()))
+    curr_vits_model = VITSModel(info)
+    # load_model(info.model_name)
 
 
 def load_model(model_name: str):
