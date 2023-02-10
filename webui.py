@@ -19,10 +19,8 @@ def init():
     ensure_output_dirs()
     vits_model.refresh_list()
     sovits_model.refresh_list()
-    if cmd_opts.ui_debug_mode:
-        return
-    # vits_model.init_model()
-    # sovits_model.init_model()
+    # if cmd_opts.ui_debug_mode:
+    #     return
 
 
 def ensure_output_dirs():
@@ -33,6 +31,7 @@ def ensure_output_dirs():
     check_and_create("outputs/vits")
     check_and_create("outputs/vits-batch")
     check_and_create("outputs/sovits")
+    check_and_create("temp")
 
 
 def run():

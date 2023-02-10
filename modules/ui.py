@@ -166,7 +166,7 @@ def create_ui():
     with gr.Blocks(analytics_enabled=False) as sovits_interface:
         with gr.Row():
             with gr.Column(scale=6, elem_id="sovits_audio_panel"):
-                sovits_audio_input = gr.Audio(label="Upload Audio File", elem_id=f"sovits_input_audio")
+                sovits_audio_input = gr.File(label="Upload Audio File", elem_id=f"sovits_input_audio")
             with gr.Column(scale=1):
                 with gr.Row():
                     sovits_submit_btn = gr.Button("Generate", elem_id=f"sovits_generate", variant="primary")
@@ -184,17 +184,20 @@ def create_ui():
                     sovits_speaker_index = gr.Dropdown(label="Speakers",
                                                        choices=sovits_speakers, value=sovits_speakers[0])
 
+                with gr.Row():
                     vc_transform = gr.Slider(value=0, minimum=-20, maximum=20, step=1,
                                              elem_id=f"vc_transform",
                                              label="VC Transform")
-
+                    slice_db = gr.Slider(value=-40, minimum=-100, maximum=0, step=5,
+                                         elem_id=f"slice_db",
+                                         label="Slice db")
             with gr.Column(variant="panel", elem_id="sovits_output"):
                 sovits_output1 = gr.Textbox(label="Output Message")
                 sovits_output2 = gr.Audio(label="Output Audio", elem_id=f"sovits_output_audio")
 
         sovits_submit_btn.click(
             fn=sovits_process,
-            inputs=[sovits_audio_input, sovits_speaker_index, vc_transform],
+            inputs=[sovits_audio_input, sovits_speaker_index, vc_transform, slice_db],
             outputs=[sovits_output1, sovits_output2]
         )
 

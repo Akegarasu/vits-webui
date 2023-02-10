@@ -95,15 +95,15 @@ class SovitsModel(Svc):
 
 
 sovits_model_list: Dict[str, ModelInfo] = {}
-curr_sovits_model: SovitsModel = None
+curr_model: SovitsModel = None
 
 
 def get_model() -> Svc:
-    return curr_sovits_model
+    return curr_model
 
 
 def get_model_name():
-    return curr_sovits_model.model_name if curr_sovits_model is not None else None
+    return curr_model.model_name if curr_model is not None else None
 
 
 def get_model_list():
@@ -111,9 +111,9 @@ def get_model_list():
 
 
 def get_speakers():
-    if curr_sovits_model is None:
+    if curr_model is None:
         return ["None"]
-    return [spk for sid, spk in curr_sovits_model.speakers.items() if spk != "None"]
+    return [spk for sid, spk in curr_model.speakers.items() if spk != "None"]
 
 
 def refresh_list():
@@ -143,14 +143,14 @@ def refresh_list():
 
 
 def load_model(model_name: str):
-    global curr_sovits_model, sovits_model_list
-    if curr_sovits_model and curr_sovits_model.model_name == model_name:
+    global curr_model, sovits_model_list
+    if curr_model and curr_model.model_name == model_name:
         return
     info = sovits_model_list[model_name]
-    print(f"Loading sovits weights [{info.model_hash}] from {info.checkpoint_path}...")
+    print(f"Loading so-vits weights [{info.model_hash}] from {info.checkpoint_path}...")
     m = SovitsModel(info)
     m.load_model()
-    curr_sovits_model = m
+    curr_model = m
     print("Sovits model loaded.")
 
 

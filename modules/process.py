@@ -1,5 +1,7 @@
 import io
+import os.path
 import re
+import shutil
 import time
 from typing import Tuple, List
 
@@ -17,6 +19,8 @@ from modules.utils import windows_filename
 from modules.vits_model import VITSModel
 from vits import commons
 from vits.text import text_to_sequence
+from repositories.sovits.inference import slicer
+from pathlib import Path
 
 
 class Text2SpeechTask:
@@ -67,7 +71,7 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     output_info = "Success saved to "
     outputs = []
     for t in task.pre_processed:
-        sample_rate, data = process_vits(model=vits_model.curr_vits_model,
+        sample_rate, data = process_vits(model=vits_model.get_model(),
                                          text=t[1], speaker_id=t[0], speed=speed)
         outputs.append(data)
         save_path = f"outputs/vits/{str(ti)}-{windows_filename(t[1])}.wav"
@@ -84,11 +88,17 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     return output_info, save_path
 
 
-def sovits_process(audio, speaker: str, vc_transform: int):
-    return process_so_vits(svc_model=sovits_model.curr_sovits_model,
-                           sid=speaker,
-                           input_audio=audio,
-                           vc_transform=vc_transform)
+def sovits_process(audio_path, speaker: str, vc_transform: int, slice_db: int):
+    ti = int(time.time())
+    data, sampling_rate = process_so_vits(svc_model=sovits_model.get_model(),
+                                          sid=speaker,
+                                          input_audio=audio_path,
+                                          vc_transform=vc_transform,
+                                          slice_db=slice_db)
+    save_path = f"outputs/sovits/{str(ti)}.wav"
+    soundfile.write(save_path, data, sampling_rate, format="wav")
+    torch_gc()
+    return "Success", save_path
 
 
 def text_processing(text, model: VITSModel):
@@ -120,20 +130,33 @@ def process_vits(model: VITSModel, text: str,
     return model.hps.data.sampling_rate, audio
 
 
-def process_so_vits(svc_model: SovitsSvc, sid, input_audio, vc_transform):
+def process_so_vits(svc_model: SovitsSvc, sid, input_audio, vc_transform, slice_db):
     if input_audio is None:
         return "You need to input an audio", None
-    sampling_rate, audio = input_audio
-    audio = (audio / np.iinfo(audio.dtype).max).astype(np.float32)
-    if len(audio.shape) > 1:
-        audio = librosa.to_mono(audio.transpose(1, 0))
-    if sampling_rate != 16000:
-        audio = librosa.resample(audio, orig_sr=sampling_rate, target_sr=16000)
-    print(audio.shape)
-    out_wav_path = io.BytesIO()
-    soundfile.write(out_wav_path, audio, 16000, format="wav")
-    out_wav_path.seek(0)
 
-    out_audio, out_sr = svc_model.infer(sid, vc_transform, out_wav_path)
-    _audio = out_audio.cpu().numpy()
-    return "Success", (32000, _audio)
+    audio_path = input_audio.name
+    wav_path = os.path.join("temp", str(int(time.time())) + ".wav")
+    if Path(audio_path).suffix != '.wav':
+        raw_audio, raw_sample_rate = librosa.load(audio_path, mono=True, sr=None)
+        soundfile.write(wav_path, raw_audio, raw_sample_rate)
+    else:
+        shutil.copy(audio_path, wav_path)
+    chunks = slicer.cut(wav_path, db_thresh=slice_db)
+    audio_data, audio_sr = slicer.chunks2audio(wav_path, chunks)
+
+    audio = []
+    for (slice_tag, data) in audio_data:
+        print(f'segment start, {round(len(data) / audio_sr, 3)}s')
+        length = int(np.ceil(len(data) / audio_sr * svc_model.target_sample))
+        raw_path = io.BytesIO()
+        soundfile.write(raw_path, data, audio_sr, format="wav")
+        raw_path.seek(0)
+        if slice_tag:
+            print('jump empty segment')
+            _audio = np.zeros(length)
+        else:
+            out_audio, out_sr = svc_model.infer(sid, vc_transform, raw_path)
+            _audio = out_audio.cpu().numpy()
+        audio.extend(list(_audio))
+    os.remove(wav_path)
+    return audio, svc_model.target_sample
