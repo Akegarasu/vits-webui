@@ -3,7 +3,7 @@ import os.path
 import gradio as gr
 
 import modules.vits_model as vits_model
-from modules.process import text2speech
+from modules.process import text2speech, sovits_process
 from modules.utils import open_folder
 from modules.vits_model import get_model_list, refresh_list
 from modules.options import opts
@@ -99,14 +99,14 @@ def create_ui():
                                                     placeholder="Text (press Ctrl+Enter or Alt+Enter to generate)")
             with gr.Column(scale=1):
                 with gr.Row():
-                    submit = gr.Button("Generate", elem_id=f"vits_generate", variant="primary")
+                    vits_submit_btn = gr.Button("Generate", elem_id=f"vits_generate", variant="primary")
 
         with gr.Row().style(equal_height=False):
             with gr.Column(variant="panel", elem_id="vits_settings"):
                 with gr.Row():
-                    model_picker = gr.Dropdown(label="VITS Checkpoint", choices=vits_model_list,
-                                               value=vits_model.get_model_name())
-                    create_refresh_button(model_picker, refresh_method=refresh_list,
+                    vits_model_picker = gr.Dropdown(label="VITS Checkpoint", choices=vits_model_list,
+                                                    value=vits_model.get_model_name())
+                    create_refresh_button(vits_model_picker, refresh_method=refresh_list,
                                           refreshed_args=lambda: {"choices": vits_model.get_model_list()},
                                           elem_id="vits-model-refresh")
                 with gr.Row():
@@ -133,13 +133,13 @@ def create_ui():
 
                         open_folder_button.click(fn=lambda: open_folder("outputs/vits"))
 
-        model_picker.change(
+        vits_model_picker.change(
             fn=change_model,
-            inputs=[model_picker],
+            inputs=[vits_model_picker],
             outputs=[speaker_index]
         )
 
-        submit.click(
+        vits_submit_btn.click(
             fn=text2speech,
             inputs=[
                 input_text,
@@ -159,14 +159,14 @@ def create_ui():
                 sovits_audio_input = gr.Audio(label="Upload Audio File", elem_id=f"sovits_input_audio")
             with gr.Column(scale=1):
                 with gr.Row():
-                    submit = gr.Button("Generate", elem_id=f"sovits_generate", variant="primary")
+                    sovits_submit_btn = gr.Button("Generate", elem_id=f"sovits_generate", variant="primary")
 
         with gr.Row().style(equal_height=False):
             with gr.Column(variant="panel", elem_id="so_vits_settings"):
                 with gr.Row():
-                    model_picker = gr.Dropdown(label="SO-VITS Checkpoint", choices=vits_model_list,
-                                               value=vits_model.get_model_name())
-                    create_refresh_button(model_picker, refresh_method=refresh_list,
+                    sovits_model_picker = gr.Dropdown(label="SO-VITS Checkpoint", choices=vits_model_list,
+                                                      value=vits_model.get_model_name())
+                    create_refresh_button(vits_model_picker, refresh_method=refresh_list,
                                           refreshed_args=lambda: {"choices": get_model_list()},
                                           elem_id="vits-model-refresh")
 
@@ -178,9 +178,15 @@ def create_ui():
                                              elem_id=f"vc_transform",
                                              label="VC Transform")
 
-            with gr.Column(variant="panel", elem_id="vits_output"):
+            with gr.Column(variant="panel", elem_id="so_vits_output"):
                 sovits_output1 = gr.Textbox(label="Output Message")
                 sovits_output2 = gr.Audio(label="Output Audio", elem_id=f"sovits_output_audio")
+
+        sovits_submit_btn.click(
+            fn=sovits_process,
+            inputs=[sovits_audio_input, sovits_speaker_index, vc_transform],
+            outputs=[sovits_output1, sovits_output2]
+        )
 
     with gr.Blocks(analytics_enabled=False) as settings_interface:
         settings_component = []

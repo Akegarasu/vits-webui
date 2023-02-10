@@ -6,6 +6,7 @@ import sys
 
 # must import before other modules load model.
 import modules.safe
+import modules.path
 
 from modules.ui import create_ui
 import modules.vits_model as vits_model

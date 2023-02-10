@@ -13,7 +13,7 @@ import torch
 import torchaudio
 
 from repositories.sovits.hubert import hubert_model
-import utils
+import modules.utils as utils
 from repositories.sovits.models import SynthesizerTrn
 from devices import device
 

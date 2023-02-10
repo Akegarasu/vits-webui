@@ -1,15 +1,22 @@
+import io
+import re
 import time
 from typing import Tuple, List
-import scipy.io.wavfile as wavfile
+
+import librosa
 import numpy as np
+import scipy.io.wavfile as wavfile
+import soundfile
 from torch import no_grad, LongTensor
-import re
+
 import modules.vits_model as vits_model
 from modules.devices import device, torch_gc
-from modules.vits_model import VITSModel
 from modules.utils import windows_filename
+from modules.vits_model import VITSModel
 from vits import commons
 from vits.text import text_to_sequence
+
+from modules.sovits_model import Svc as SovitsSvc
 
 
 class Text2SpeechTask:
@@ -45,6 +52,10 @@ class Text2SpeechTask:
                 self.pre_processed.append((speaker_id, line))
 
 
+class SovitsTask:
+    pass
+
+
 def text2speech(text: str, speaker: str, speed, method="Simple"):
     task = Text2SpeechTask(origin=text, speaker=speaker, method=method)
     err = task.preprocess()
@@ -70,6 +81,10 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
         wavfile.write(batch_file_path, vits_model.curr_vits_model.hps.data.sampling_rate, np.concatenate(outputs))
         return f"{output_info}\n{batch_file_path}", batch_file_path
     return output_info, save_path
+
+
+def sovits_process():
+    pass
 
 
 def text_processing(text, model: VITSModel):
@@ -99,3 +114,22 @@ def process_vits(model: VITSModel, text: str,
                                   length_scale=1.0 / speed)[0][0, 0].data.cpu().float().numpy()
     del stn_tst, x_tst, x_tst_lengths, sid
     return model.hps.data.sampling_rate, audio
+
+
+def process_so_vits(svc_model: SovitsSvc, sid, input_audio, vc_transform):
+    if input_audio is None:
+        return "You need to input an audio", None
+    sampling_rate, audio = input_audio
+    audio = (audio / np.iinfo(audio.dtype).max).astype(np.float32)
+    if len(audio.shape) > 1:
+        audio = librosa.to_mono(audio.transpose(1, 0))
+    if sampling_rate != 16000:
+        audio = librosa.resample(audio, orig_sr=sampling_rate, target_sr=16000)
+    print(audio.shape)
+    out_wav_path = io.BytesIO()
+    soundfile.write(out_wav_path, audio, 16000, format="wav")
+    out_wav_path.seek(0)
+
+    out_audio, out_sr = svc_model.infer(sid, vc_transform, out_wav_path)
+    _audio = out_audio.cpu().numpy()
+    return "Success", (32000, _audio)
