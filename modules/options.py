@@ -14,7 +14,7 @@ parser.add_argument("--share", action='store_true', help="use share=True for gra
 parser.add_argument("--server-name", type=str, help="sets hostname of server", default=None)
 parser.add_argument("--autolaunch", action='store_true', help="open the webui URL in the system's default browser upon launch", default=False)
 parser.add_argument("--device-id", type=str, help="select the default CUDA device to use", default=None)
-parser.add_argument("--cpu", action='store_true', help="use cpu")
+parser.add_argument("--use-cpu", action='store_true', help="use cpu")
 parser.add_argument("--disable-safe-unpickle", action='store_true', help="disable safe unpickle")
 parser.add_argument("--freeze-settings", action='store_true', help="freeze settings")
 parser.add_argument("--ui-debug-mode", action='store_true', help="Don't load model to quickly launch UI")
@@ -35,9 +35,9 @@ class OptionInfo:
 
 options_templates = {}
 
-options_templates.update({
-    # "vits_model": OptionInfo(None, "VITS checkpoint", gr.Dropdown, lambda: {"choices": list_checkpoint_tiles()}, refresh=refresh_checkpoints),
-})
+# options_templates.update({
+#     "vits_model": OptionInfo(None, "VITS checkpoint", gr.Dropdown, lambda: {"choices": list_checkpoint_tiles()}, refresh=refresh_checkpoints),
+# })
 
 options_templates.update({
     "localization": OptionInfo("None", "Localization (requires restart)", gr.Dropdown, lambda: {"choices": ["None"] + localization_files}),
