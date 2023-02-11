@@ -62,6 +62,11 @@ class SovitsTask:
 
 
 def text2speech(text: str, speaker: str, speed, method="Simple"):
+    if text == "":
+        return "Fail: You need to input text.", None
+    model = vits_model.get_model()
+    if not model:
+        return "Fail: No vits model loaded. Please select a model to load first.", None
     task = Text2SpeechTask(origin=text, speaker=speaker, method=method)
     err = task.preprocess()
     if err:
@@ -71,7 +76,7 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     output_info = "Success saved to "
     outputs = []
     for t in task.pre_processed:
-        sample_rate, data = process_vits(model=vits_model.get_model(),
+        sample_rate, data = process_vits(model=model,
                                          text=t[1], speaker_id=t[0], speed=speed)
         outputs.append(data)
         save_path = f"outputs/vits/{str(ti)}-{windows_filename(t[1])}.wav"
@@ -89,6 +94,11 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
 
 
 def sovits_process(audio_path, speaker: str, vc_transform: int, slice_db: int):
+    if not audio_path:
+        return "Fail: You need to input an audio.", None
+    model = sovits_model.get_model()
+    if not model:
+        return "Fail: No so-vits model loaded. Please select a model to load first.", None
     ti = int(time.time())
     data, sampling_rate = process_so_vits(svc_model=sovits_model.get_model(),
                                           sid=speaker,
@@ -131,9 +141,6 @@ def process_vits(model: VITSModel, text: str,
 
 
 def process_so_vits(svc_model: SovitsSvc, sid, input_audio, vc_transform, slice_db):
-    if input_audio is None:
-        return "You need to input an audio", None
-
     audio_path = input_audio.name
     wav_path = os.path.join("temp", str(int(time.time())) + ".wav")
     if Path(audio_path).suffix != '.wav':

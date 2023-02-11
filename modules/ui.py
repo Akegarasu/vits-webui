@@ -247,7 +247,7 @@ def create_ui():
 
     interfaces = [
         (txt2img_interface, "VITS", "vits"),
-        (sovits_interface, "SO-VITS (dev)", "sovits"),
+        (sovits_interface, "SO-VITS", "sovits"),
         (settings_interface, "Settings", "settings")
     ]
 
