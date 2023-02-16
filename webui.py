@@ -31,6 +31,7 @@ def ensure_output_dirs():
     check_and_create("outputs/vits")
     check_and_create("outputs/vits-batch")
     check_and_create("outputs/sovits")
+    check_and_create("outputs/sovits-batch")
     check_and_create("temp")
 
 

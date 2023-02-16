@@ -151,7 +151,7 @@ def load_model(model_name: str):
     m = SovitsModel(info)
     m.load_model()
     curr_model = m
-    print("Sovits model loaded.")
+    print("so-vits model loaded.")
 
 
 def load_checkpoint(checkpoint_path, model, optimizer=None):

@@ -166,7 +166,7 @@ def create_ui():
     with gr.Blocks(analytics_enabled=False) as sovits_interface:
         with gr.Row():
             with gr.Column(scale=6, elem_id="sovits_audio_panel"):
-                sovits_audio_input = gr.File(label="Upload Audio File", elem_id=f"sovits_input_audio")
+                sovits_audio_input = gr.File(label="Upload Audio File", elem_id=f"sovits_input_audio", file_count="multiple")
             with gr.Column(scale=1):
                 with gr.Row():
                     sovits_submit_btn = gr.Button("Generate", elem_id=f"sovits_generate", variant="primary")

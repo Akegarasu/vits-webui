@@ -3,6 +3,7 @@ import os.path
 import re
 import shutil
 import time
+import tqdm
 from typing import Tuple, List
 
 import librosa
@@ -93,22 +94,36 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     return output_info, save_path
 
 
-def sovits_process(audio_path, speaker: str, vc_transform: int, slice_db: int):
+def sovits_process(audio_path: List, speaker: str, vc_transform: int, slice_db: int):
     if not audio_path:
         return "Fail: You need to input an audio.", None
     model = sovits_model.get_model()
     if not model:
         return "Fail: No so-vits model loaded. Please select a model to load first.", None
     ti = int(time.time())
-    data, sampling_rate = process_so_vits(svc_model=sovits_model.get_model(),
-                                          sid=speaker,
-                                          input_audio=audio_path,
-                                          vc_transform=vc_transform,
-                                          slice_db=slice_db)
-    save_path = f"outputs/sovits/{str(ti)}.wav"
-    soundfile.write(save_path, data, sampling_rate, format="wav")
+    save_path = ""
+    output_info = "Success saved to "
+    outputs = []
+    for af in audio_path:
+        data, sampling_rate = process_so_vits(svc_model=sovits_model.get_model(),
+                                              sid=speaker,
+                                              input_audio=af,
+                                              vc_transform=vc_transform,
+                                              slice_db=slice_db)
+        outputs.extend(data)
+        save_path = f"outputs/sovits/{str(ti)}.wav"
+        soundfile.write(save_path, data, sampling_rate, format="wav")
+        ti += 1
+        output_info += f"\n{save_path}"
+
     torch_gc()
-    return "Success", save_path
+
+    if len(outputs) > 1:
+        batch_file_path = f"outputs/sovits-batch/{str(int(time.time()))}.wav"
+        soundfile.write(batch_file_path, outputs, sovits_model.get_model().target_sample)
+        return f"{output_info}\n{batch_file_path}", batch_file_path
+
+    return output_info, save_path
 
 
 def text_processing(text, model: VITSModel):
@@ -152,14 +167,14 @@ def process_so_vits(svc_model: SovitsSvc, sid, input_audio, vc_transform, slice_
     audio_data, audio_sr = slicer.chunks2audio(wav_path, chunks)
 
     audio = []
-    for (slice_tag, data) in audio_data:
-        print(f'segment start, {round(len(data) / audio_sr, 3)}s')
+    for (slice_tag, data) in tqdm.tqdm(audio_data):
+        # print(f'segment start, {round(len(data) / audio_sr, 3)}s')
         length = int(np.ceil(len(data) / audio_sr * svc_model.target_sample))
         raw_path = io.BytesIO()
         soundfile.write(raw_path, data, audio_sr, format="wav")
         raw_path.seek(0)
         if slice_tag:
-            print('jump empty segment')
+            # print('jump empty segment')
             _audio = np.zeros(length)
         else:
             out_audio, out_sr = svc_model.infer(sid, vc_transform, raw_path)
