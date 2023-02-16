@@ -19,20 +19,21 @@ def init():
     ensure_output_dirs()
     vits_model.refresh_list()
     sovits_model.refresh_list()
-    # if cmd_opts.ui_debug_mode:
-    #     return
+    if cmd_opts.ui_debug_mode:
+        return
+    # todo: autoload last model
+    # load_last_model()
 
 
 def ensure_output_dirs():
+    folders = ["outputs/vits", "outputs/vits-batch", "outputs/sovits", "outputs/sovits", "outputs/sovits-batch", "temp"]
+
     def check_and_create(p):
         if not os.path.exists(p):
             os.makedirs(p)
 
-    check_and_create("outputs/vits")
-    check_and_create("outputs/vits-batch")
-    check_and_create("outputs/sovits")
-    check_and_create("outputs/sovits-batch")
-    check_and_create("temp")
+        for i in folders:
+            check_and_create(i)
 
 
 def run():
