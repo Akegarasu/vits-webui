@@ -3,25 +3,26 @@ import os.path
 import re
 import shutil
 import time
-import tqdm
+from pathlib import Path
 from typing import Tuple, List
 
 import librosa
 import numpy as np
 import scipy.io.wavfile as wavfile
 import soundfile
+import tqdm
 from torch import no_grad, LongTensor
 
 import modules.sovits_model as sovits_model
 import modules.vits_model as vits_model
 from modules.devices import device, torch_gc
+from modules.options import cmd_opts
 from modules.sovits_model import Svc as SovitsSvc
 from modules.utils import windows_filename
 from modules.vits_model import VITSModel
+from repositories.sovits.inference import slicer
 from vits import commons
 from vits.text import text_to_sequence
-from repositories.sovits.inference import slicer
-from pathlib import Path
 
 
 class Text2SpeechTask:
@@ -168,13 +169,15 @@ def process_so_vits(svc_model: SovitsSvc, sid, input_audio, vc_transform, slice_
 
     audio = []
     for (slice_tag, data) in tqdm.tqdm(audio_data):
-        # print(f'segment start, {round(len(data) / audio_sr, 3)}s')
+        if cmd_opts.debug:
+            print(f'segment start, {round(len(data) / audio_sr, 3)}s')
         length = int(np.ceil(len(data) / audio_sr * svc_model.target_sample))
         raw_path = io.BytesIO()
         soundfile.write(raw_path, data, audio_sr, format="wav")
         raw_path.seek(0)
         if slice_tag:
-            # print('jump empty segment')
+            if cmd_opts.debug:
+                print('jump empty segment')
             _audio = np.zeros(length)
         else:
             out_audio, out_sr = svc_model.infer(sid, vc_transform, raw_path)

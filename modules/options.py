@@ -19,6 +19,9 @@ parser.add_argument("--disable-safe-unpickle", action='store_true', help="disabl
 parser.add_argument("--freeze-settings", action='store_true', help="freeze settings")
 parser.add_argument("--ui-debug-mode", action='store_true', help="Don't load model to quickly launch UI")
 
+# todo: use logger
+parser.add_argument("--debug", action='store_true', help="Output debug log")
+
 cmd_opts = parser.parse_args()
 
 

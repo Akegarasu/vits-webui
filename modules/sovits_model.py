@@ -15,6 +15,7 @@ import modules.utils as utils
 from modules.devices import device
 from modules.model import ModelInfo
 from modules.model import refresh_model_list
+from modules.options import cmd_opts
 from modules.utils import model_hash
 from repositories.sovits.hubert import hubert_model
 from repositories.sovits.models import SynthesizerTrn
@@ -56,7 +57,8 @@ class Svc(object):
             start = time.time()
             units = self.hubert_soft.units(source)
             use_time = time.time() - start
-            print("hubert use time:{}".format(use_time))
+            if cmd_opts.debug:
+                print("hubert use time: {}".format(use_time))
             return units
 
     def get_unit_pitch(self, in_path, tran):
@@ -84,7 +86,8 @@ class Svc(object):
             x_tst = torch.repeat_interleave(x_tst, repeats=2, dim=1).transpose(1, 2)
             audio = self.net_g_ms.infer(x_tst, f0=f0, g=sid)[0, 0].data.float()
             use_time = time.time() - start
-            print("vits use time:{}".format(use_time))
+            if cmd_opts.debug:
+                print("vits use time: {}".format(use_time))
         return audio, audio.shape[-1]
 
 
