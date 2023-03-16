@@ -95,7 +95,7 @@ def text2speech(text: str, speaker: str, speed, method="Simple"):
     return output_info, save_path
 
 
-def sovits_process(audio_path: List, speaker: str, vc_transform: int, slice_db: int):
+def sovits_process(audio_path, speaker: str, vc_transform: int, slice_db: int):
     if not audio_path:
         return "Fail: You need to input an audio.", None
     model = sovits_model.get_model()
@@ -105,24 +105,26 @@ def sovits_process(audio_path: List, speaker: str, vc_transform: int, slice_db: 
     save_path = ""
     output_info = "Success saved to "
     outputs = []
-    for af in audio_path:
-        data, sampling_rate = process_so_vits(svc_model=sovits_model.get_model(),
-                                              sid=speaker,
-                                              input_audio=af,
-                                              vc_transform=vc_transform,
-                                              slice_db=slice_db)
-        outputs.extend(data)
-        save_path = f"outputs/sovits/{str(ti)}.wav"
-        soundfile.write(save_path, data, sampling_rate, format="wav")
-        ti += 1
-        output_info += f"\n{save_path}"
+    try:
+        for af in audio_path:
+            data, sampling_rate = process_so_vits(svc_model=sovits_model.get_model(),
+                                                  sid=speaker,
+                                                  input_audio=af,
+                                                  vc_transform=vc_transform,
+                                                  slice_db=slice_db)
+            outputs.extend(data)
+            save_path = f"outputs/sovits/{str(ti)}.wav"
+            soundfile.write(save_path, data, sampling_rate, format="wav")
+            ti += 1
+            output_info += f"\n{save_path}"
 
-    torch_gc()
+        if len(outputs) > 1:
+            batch_file_path = f"outputs/sovits-batch/{str(int(time.time()))}.wav"
+            soundfile.write(batch_file_path, outputs, sovits_model.get_model().target_sample)
+            return f"{output_info}\n{batch_file_path}", batch_file_path
 
-    if len(outputs) > 1:
-        batch_file_path = f"outputs/sovits-batch/{str(int(time.time()))}.wav"
-        soundfile.write(batch_file_path, outputs, sovits_model.get_model().target_sample)
-        return f"{output_info}\n{batch_file_path}", batch_file_path
+    finally:
+        torch_gc()
 
     return output_info, save_path
 
