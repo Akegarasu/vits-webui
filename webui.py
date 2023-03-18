@@ -32,8 +32,8 @@ def ensure_output_dirs():
         if not os.path.exists(p):
             os.makedirs(p)
 
-        for i in folders:
-            check_and_create(i)
+    for i in folders:
+        check_and_create(i)
 
 
 def run():
